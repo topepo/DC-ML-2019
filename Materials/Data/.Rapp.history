@@ -1,0 +1,59 @@
+load("/Users/max/github/research/Courses/2018_089_16_NY/Data/car_data_splits.RData")
+library(tidymodels)
+names(car_train)
+car_train %>% select(two_door_lug_vol, hatch_lug_vol) %>% cor()
+car_train %>% select(contains("vol")) %>% cor()
+lm_1_2 <- lm(mpg ~ two_door_lug_vol + two_door_pass_vol, data = car_train)#
+lm_1 <- lm(mpg ~ two_door_lug_vol, data = car_train)#
+lm_2 <- lm(mpg ~ two_door_pass_vol, data = car_train)#
+#
+coef_tbl <- data.frame(two_door_lug_vol = 0,#
+                       two_door_pass_vol = 0,#
+                       Both = coef(lm_1_2)[-1],#
+                       Inflation = NA)#
+coef_tbl$two_door_lug_vol[1] <- coef(lm_1)[2]#
+coef_tbl$Inflation[1] <- #
+  summary(lm_1_2)$coefficients["two_door_lug_vol", "Std. Error"]^2/#
+  summary(lm_1)$coefficients["two_door_lug_vol", "Std. Error"]^2#
+coef_tbl$two_door_pass_vol[2] <- coef(lm_2)[2]#
+coef_tbl$Inflation[2] <- #
+  summary(lm_1_2)$coefficients["two_door_pass_vol", "Std. Error"]^2/#
+  summary(lm_2)$coefficients["two_door_pass_vol", "Std. Error"]^2
+coef_tbl
+coef_chr <- format(coef_tbl)#
+coef_chr$two_door_lug_vol[2] <- ""#
+coef_chr$two_door_pass_vol[1] <- ""#
+#
+set.seed(653)#
+car_train_splits <- vfold_cv(car_train)#
+#
+car_train_perf <- function(data_split, ...) {#
+  mod <- lm(..., data = analysis(data_split))#
+  vars <- rsample::form_pred(mod$terms)#
+  assess_dat <- assessment(data_split)[vars]#
+  assess_dat$pred <- predict(mod, newdata = assessment(data_split))#
+  assess_dat$price <- assessment(data_split)$mpg#
+  rmse <- assess_dat %>% rmse(truth = price, estimate = pred)#
+  rmse#
+}#
+#
+car_train_splits$both <- #
+  map_dbl(car_train_splits$splits, car_train_perf, #
+          formula = as.formula(mpg ~  two_door_lug_vol + two_door_pass_vol))#
+#
+car_train_splits$two_door_lug_vol <- #
+  map_dbl(car_train_splits$splits, car_train_perf, #
+          formula = as.formula(mpg ~ two_door_lug_vol))#
+#
+car_train_splits$two_door_pass_vol <- #
+  map_dbl(car_train_splits$splits, car_train_perf, #
+          formula = as.formula(mpg ~ two_door_pass_vol))#
+car_train_rmse <- colMeans(car_train_splits[, -(1:2)])
+car_train_rmse
+coef_chr
+coef_tbl
+colnames(coef_tbl)[1:2] <- #
+  c("2Door Lugg Vol", "2Door Pass Vol")#
+rownames(coef_tbl) <- #
+  c("2Door Lugg Vol", "2Door Pass Vol")
+coef_tbl
