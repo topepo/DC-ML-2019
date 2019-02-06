@@ -1,5 +1,4 @@
-# Slides for Applied Machine Learning workshop at 2019 RStudio ---
-# Conference -----------------------------------------------------
+# Slides for Applied Machine Learning workshop 
 
 # Part_5_Classification.R Hans-on #2
 

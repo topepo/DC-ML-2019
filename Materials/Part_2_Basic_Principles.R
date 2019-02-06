@@ -1,5 +1,4 @@
-# Slides for Applied Machine Learning workshop at 2019 RStudio ---
-# Conference -----------------------------------------------------
+# Slides for Applied Machine Learning workshop 
 
 # Part_2_Basic_Principles.R
 
