@@ -37,3 +37,30 @@ simple_lm_values <- augment(simple_lm)
 #  - Plot the predicted versus residuals
 #
 # Are there any downsides to this approach?
+
+ggplot(simple_lm_values, aes(x = log10.Sale_Price., y = .fitted)) + 
+  geom_point(alpha = 0.5, cex = .5) +
+  geom_abline() 
+
+simple_lm_values %>% 
+  mutate(
+    lon_cut = cut(Longitude, breaks = 5),
+    lat_cut = cut(Latitude, breaks = 5)
+  ) %>% 
+  ggplot(aes(x = log10.Sale_Price., y = .fitted)) + 
+  geom_point(alpha = 0.5, cex = .5) +
+  geom_abline() + 
+  facet_grid(lon_cut ~ lat_cut)
+
+
+ggplot(simple_lm_values, aes(x = Longitude, y = .resid)) + 
+  geom_point(alpha = 0.5, cex = .5) + 
+  geom_smooth()
+
+ggplot(simple_lm_values, aes(x = .fitted, y = .resid)) + 
+  geom_point(alpha = 0.5, cex = .5) + 
+  geom_smooth()
+
+
+
+
